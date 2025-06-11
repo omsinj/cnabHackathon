@@ -1,0 +1,15 @@
+PIX_SEGMENT_B_SCHEMA = [
+    {"name": "bank_code", "start": 1, "end": 3, "type": "num"},
+    {"name": "service_batch", "start": 4, "end": 7, "type": "num"},
+    {"name": "record_type", "start": 8, "end": 8, "type": "num"},
+    {"name": "record_number", "start": 9, "end": 13, "type": "num"},
+    {"name": "segment_code", "start": 14, "end": 14, "type": "alpha"},
+    {"name": "form_of_initiation", "start": 15, "end": 17, "type": "alpha"},
+    {"name": "registration_type", "start": 18, "end": 18, "type": "num"},
+    {"name": "registration_number", "start": 19, "end": 32, "type": "num"},
+    {"name": "info_10", "start": 33, "end": 67, "type": "alpha"},
+    {"name": "info_11", "start": 68, "end": 127, "type": "alpha"},
+    {"name": "info_12", "start": 128, "end": 226, "type": "alpha"},
+    {"name": "centralizing_ug_code", "start": 227, "end": 232, "type": "num"},
+    {"name": "ispb_code", "start": 233, "end": 240, "type": "num"},
+]
