@@ -1,6 +1,0 @@
-Traceback (most recent call last):
-  File "H:\jpmDesk\Desktop\Hackathon2025\generate_training_data.py", line 4, in <module>
-    from validator import validate_file_structure, explain_segment
-  File "H:\jpmDesk\Desktop\Hackathon2025\validator.py", line 5, in <module>
-    from schemas.file_header import FILE_HEADER_SCHEMA
-ModuleNotFoundError: No module named 'schemas'
