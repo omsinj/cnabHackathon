@@ -3,6 +3,7 @@ from parser import parse_cnab240
 from validator import validate_file_structure
 from simulator import regenerate_file
 from suggestions import suggest_fixes
+from auto_fix import auto_fix, describe_auto_fixes
 
 # --------------------
 # AI Explanation Helper
@@ -103,10 +104,19 @@ def main():
         st.metric("📊 File Quality Score", f"{score}/100")
 
         if st.button("🔧 Auto-Apply Fixes"):
-            st.info("Auto-fix logic placeholder. Fixing pipeline in development.")
+            fixed_data = auto_fix(parsed)
+            fix_messages = describe_auto_fixes(parsed, fixed_data)
+            st.session_state["fixed_data"] = fixed_data
+
+            st.success("✅ Auto-fixes applied:")
+            for fix in fix_messages:
+                st.markdown(f"- {fix}")
+        else:
+            st.session_state["fixed_data"] = parsed  # fallback
 
         if st.button("📤 Generate & Download .txt File"):
-            new_lines = regenerate_file(parsed)
+            final_data = st.session_state.get("fixed_data", parsed)
+            new_lines = regenerate_file(final_data)
             cnab_text = "\n".join(new_lines)
             st.download_button("⬇️ Download Corrected CNAB240", cnab_text, file_name="corrected.cnab240.txt")
 
