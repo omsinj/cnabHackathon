@@ -1,0 +1,105 @@
+SYSTEM BREAKDOWN
+🔧 Prerequisites
+Make sure you have:
+
+Python 3.8+
+
+pip package manager
+
+Streamlit installed:
+
+bash
+Copy
+Edit
+pip install streamlit pandas scikit-learn
+🗂️ FILE STRUCTURE (recommended)
+bash
+Copy
+Edit
+project/
+├── app.py                            # 🌟 Streamlit interface
+├── parser.py                         # 🔍 Parses CNAB240 files
+├── validator.py                      # ✅ Schema & rule validation
+├── simulator.py                      # 🔁 Rebuilds fixed files
+├── suggestions.py                    # 💡 AI-based fix recommendations
+├── explainer.py (optional)           # 🧠 Segment natural language summaries
+├── segment_classifier.py             # 🤖 ML model for segment prediction
+├── generate_training_data.py         # 🧪 For training segment classifier
+├── schemas/
+│   ├── segment_a.py, segment_b.py... # 🧾 Field schemas
+├── models/
+│   └── segment_classifier.pkl        # (Optional) Trained classifier
+└── data/
+    ├── sample_files/                 # 🧪 Place raw .txt CNAB240 files here
+    └── training/
+        └── segments.csv              # 🔍 Training data extracted from samples
+🏗️ STEP-BY-STEP EXECUTION
+✅ Step 1: Install Dependencies
+bash
+Copy
+Edit
+pip install streamlit pandas scikit-learn
+✅ Step 2: Prepare Your Data
+Put one or more .txt CNAB240 files into this directory:
+
+bash
+Copy
+Edit
+data/sample_files/
+Example filename: example1.txt
+
+✅ Step 3: Generate Training Data (optional)
+If you want to train the ML classifier:
+
+bash
+Copy
+Edit
+python generate_training_data.py
+➡️ This generates: data/training/segments.csv
+
+✅ Step 4: Train Segment Classifier (optional)
+bash
+Copy
+Edit
+python segment_classifier.py
+➡️ This will train and save models/segment_classifier.pkl
+
+✅ Step 5: Launch the Web App
+bash
+Copy
+Edit
+streamlit run app.py
+🔍 This launches a browser app at:
+
+arduino
+Copy
+Edit
+http://localhost:8501
+🚀 APP FEATURES
+Once running, the app will let you:
+
+✅ Upload .txt CNAB240 files
+✅ Parse into file header, batches, segments
+✅ View structured data + raw lines
+✅ Validate against schema and rules
+✅ See smart AI suggestions
+✅ Compute a quality score
+✅ Regenerate .txt file
+✅ Export validation report (HTML)
+
+🧠 BONUS: AI Features
+If classifier is trained:
+
+Adds robustness in identifying segments
+
+Potential future use: auto-classify ambiguous segments
+
+If anomaly detection is added:
+
+Automatically flags strange values (e.g. huge amounts)
+
+📌 TROUBLESHOOTING TIPS
+Issue	Fix
+No training data	Add .txt files in data/sample_files/ and rerun generator
+Module not found	Check file names, use relative imports correctly
+Streamlit not launching	Try in a clean virtualenv and re-install streamlit
