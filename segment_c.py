@@ -1,0 +1,20 @@
+SEGMENT_C_SCHEMA = [
+    {"name": "bank_code", "start": 1, "end": 3, "type": "num"},
+    {"name": "service_batch", "start": 4, "end": 7, "type": "num"},
+    {"name": "record_type", "start": 8, "end": 8, "type": "num"},
+    {"name": "record_number", "start": 9, "end": 13, "type": "num"},
+    {"name": "segment_code", "start": 14, "end": 14, "type": "alpha"},
+    {"name": "ir_amount", "start": 18, "end": 32, "type": "num"},
+    {"name": "iss_amount", "start": 33, "end": 47, "type": "num"},
+    {"name": "iof_amount", "start": 48, "end": 62, "type": "num"},
+    {"name": "other_deductions", "start": 63, "end": 77, "type": "num"},
+    {"name": "other_additions", "start": 78, "end": 92, "type": "num"},
+    {"name": "agency", "start": 93, "end": 97, "type": "num"},
+    {"name": "agency_digit", "start": 98, "end": 98, "type": "alpha"},
+    {"name": "account_number", "start": 99, "end": 110, "type": "num"},
+    {"name": "account_digit", "start": 111, "end": 111, "type": "alpha"},
+    {"name": "agency_account_digit", "start": 112, "end": 112, "type": "alpha"},
+    {"name": "inss_amount", "start": 113, "end": 127, "type": "num"},
+    {"name": "payment_account_number", "start": 128, "end": 147, "type": "num"},
+]
+
