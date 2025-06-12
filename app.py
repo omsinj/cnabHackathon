@@ -5,6 +5,17 @@ from simulator import regenerate_file
 from suggestions import suggest_fixes
 from auto_fix import auto_fix, describe_auto_fixes
 
+from compare_diff import generate_diff_table
+
+# Add inside app logic, after regenerate
+if st.button("🧬 Compare Original vs. Fixed File"):
+    fixed_data = st.session_state.get("fixed_data", parsed)
+    original_text = regenerate_file(parsed)
+    fixed_text = regenerate_file(fixed_data)
+
+    diff_html = generate_diff_table(original_text, fixed_text)
+    st.components.v1.html(diff_html, height=600, scrolling=True)
+
 # --------------------
 # AI Explanation Helper
 # --------------------
