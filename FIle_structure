@@ -1,0 +1,40 @@
+cnab_ai_parser/
+│
+├── app.py                             # Main Streamlit interface
+├── parser.py                          # CNAB240 line parser
+├── validator.py                       # Rule-based validation engine
+├── suggestions.py                     # Auto-fix suggestions engine
+├── simulator.py                       # JSON → .txt formatter
+├── anomaly_detector.py                # Isolation Forest model
+├── segment_classifier.py              # Optional segment ML classifier
+├── generate_training_data.py          # Tool to prepare model training dataset
+│
+├── models/                            # (optional) trained ML models
+│   └── anomaly_model.pkl              # saved anomaly detection model
+│
+├── data/
+│   ├── example_files/                 # Sample .txt CNAB files for testing
+│   └── training_samples/              # Labeled lines for model training
+│
+├── schemas/                           # Segment field definitions
+│   ├── file_header.py
+│   ├── file_trailer.py
+│   ├── segment_a.py
+│   ├── segment_b.py
+│   ├── segment_c.py
+│   ├── segment_j.py
+│   ├── segment_j52.py
+│   ├── segment_n.py
+│   ├── segment_o.py
+│   ├── segment_z.py
+│   ├── boletos_batch_trailer.py
+│   ├── boletos_batch_header.py
+│   ├── pix_segment_a.py
+│   ├── pix_segment_b.py
+│   ├── pix_segment_c.py
+│   ├── pix_batch_header.py
+│   ├── pix_batch_trailer.py
+│   ├── batch_header_ted.py
+│   └── batch_trailer.py
+│
+└── requirements.txt                  # Python dependencies (e.g. streamlit, scikit-learn, pandas)
