@@ -1,15 +1,16 @@
 from typing import List, Dict
+import os
 import joblib
 import pandas as pd
 
-# Constants based on CNAB240 spec
+# Constants for identifying record and segment types
 SEGMENT_MAP = {
+    'A00': 'Segment A00 - Initiation',
     'A': 'Segment A - Payment Info',
-    'A00': 'Segment A00 - Payment Initiation',
-    'B': 'Segment B - Beneficiary Details',
-    'C': 'Segment C - Taxes/Deductions',
+    'B': 'Segment B - Beneficiary Info',
+    'C': 'Segment C - Deductions',
     'J': 'Segment J - Boleto Info',
-    'J52': 'Segment J52 - Boleto Extra Info',
+    'J52': 'Segment J52 - Boleto Extended Info',
     'N': 'Segment N - Non-Barcoded Tax',
     'O': 'Segment O - Barcoded Tax',
     'Z': 'Segment Z - Authentication'
@@ -17,33 +18,45 @@ SEGMENT_MAP = {
 
 RECORD_TYPE_POS = 7
 SEGMENT_CODE_POS = 13
+MODEL_PATH = "models/segment_classifier.pkl"
 
-# ------------------------------
-# AI-Powered Segment Classifier
-# ------------------------------
+_model = None
+
+# ------------------------
+# AI Segment Predictor
+# ------------------------
 def predict_segment_type(line: str) -> str:
-    try:
-        model = joblib.load("models/segment_classifier.pkl")
-        le = joblib.load("models/segment_label_encoder.pkl")
+    global _model
+    if _model is None:
+        if os.path.exists(MODEL_PATH):
+            _model = joblib.load(MODEL_PATH)
+        else:
+            return "UNKNOWN"
 
-        features = {
-            "length": len(line),
-            "record_type": line[RECORD_TYPE_POS] if len(line) > RECORD_TYPE_POS else "",
-            "segment_code": line[SEGMENT_CODE_POS] if len(line) > SEGMENT_CODE_POS else "",
-            "digit_count": sum(c.isdigit() for c in line),
-            "alpha_count": sum(c.isalpha() for c in line),
-            "space_count": sum(c.isspace() for c in line),
-        }
+    features = {
+        "length": len(line),
+        "record_type": line[7],
+        "segment_code": line[13],
+        "bank_code": line[:3],
+        "agency": line[17:21],
+        "payment_date": line[94:102],
+        "currency": line[102:105],
+        "amount": line[120:135],
+        "tail": line[-10:]
+    }
 
-        X = pd.DataFrame([features])
-        y_pred = model.predict(X)
-        return le.inverse_transform(y_pred)[0]
-    except Exception as e:
-        return "UNK"  # fallback
+    df = pd.DataFrame([features])
+    df = df.fillna("")
+    df = df.astype({
+        "record_type": "category", "segment_code": "category", "bank_code": "category",
+        "currency": "category", "tail": "category"
+    })
 
-# ------------------------------
-# Main Parsing Function
-# ------------------------------
+    return _model.predict(df)[0]
+
+# ----------------------------------
+# Main CNAB240 File Parsing Function
+# ----------------------------------
 def parse_cnab240(lines: List[str]) -> Dict:
     data = {
         "file_header": {},
@@ -69,7 +82,7 @@ def parse_cnab240(lines: List[str]) -> Dict:
 
         elif record_type == '3':
             segment_code = line[SEGMENT_CODE_POS:SEGMENT_CODE_POS+3].strip()
-            if not segment_code or segment_code == '':
+            if segment_code not in SEGMENT_MAP:
                 segment_code = predict_segment_type(line)
             segment = parse_segment(line, segment_code)
             current_batch['segments'].append(segment)
@@ -82,9 +95,9 @@ def parse_cnab240(lines: List[str]) -> Dict:
 
     return data
 
-# ------------------------------
-# Parsers for Line Types
-# ------------------------------
+# --------------------------
+# Record-Level Parse Helpers
+# --------------------------
 def parse_header(line: str) -> Dict:
     return {
         "bank_code": line[0:3],
@@ -112,6 +125,9 @@ def parse_file_trailer(line: str) -> Dict:
         "total_records": line[23:29].strip(),
     }
 
+# -------------------------
+# Segment Parser Dispatcher
+# -------------------------
 def parse_segment(line: str, code: str) -> Dict:
     label = SEGMENT_MAP.get(code, f"Unknown Segment {code}")
     return {
@@ -121,11 +137,11 @@ def parse_segment(line: str, code: str) -> Dict:
         "fields": extract_fields(line, code)
     }
 
-# ------------------------------
-# Field Extractors by Segment
-# ------------------------------
+# -------------------------
+# Field Extractors Per Segment
+# -------------------------
 def extract_fields(line: str, code: str) -> Dict:
-    if code in ['A00', 'A']:
+    if code in ['A', 'A00']:
         return {
             "payer_bank_code": line[0:3],
             "payer_agency": line[17:21].strip(),
@@ -146,20 +162,20 @@ def extract_fields(line: str, code: str) -> Dict:
     elif code == 'B':
         return {
             "beneficiary_tax_id": line[18:32].strip(),
-            "address": line[33:62].strip(),
-            "address_number": line[63:68].strip(),
-            "address_complement": line[68:83].strip(),
-            "neighborhood": line[83:98].strip(),
-            "city": line[98:118].strip(),
-            "zip_code": line[118:123].strip(),
-            "zip_suffix": line[123:126].strip(),
-            "state": line[126:128].strip(),
-            "expiration_date": line[128:136].strip(),
-            "document_value": line[136:151].strip(),
-            "rebate": line[151:166].strip(),
-            "discount": line[166:181].strip(),
-            "interest": line[181:196].strip(),
-            "fine": line[196:211].strip(),
+            "address": line[33:68].strip(),
+            "address_number": line[68:73].strip(),
+            "address_complement": line[73:88].strip(),
+            "neighborhood": line[88:108].strip(),
+            "city": line[108:128].strip(),
+            "zip_code": line[128:133].strip(),
+            "zip_suffix": line[133:136].strip(),
+            "state": line[136:138].strip(),
+            "expiration_date": line[136:144].strip(),
+            "document_value": line[144:159].strip(),
+            "rebate": line[159:174].strip(),
+            "discount": line[174:189].strip(),
+            "interest": line[189:204].strip(),
+            "fine": line[204:219].strip(),
         }
 
     elif code == 'C':
@@ -189,12 +205,14 @@ def extract_fields(line: str, code: str) -> Dict:
     elif code == 'J52':
         return {
             "payer_enrollment_type": line[20:21].strip(),
-            "payer_enrollment_number": line[21:35].strip(),
-            "payer_name": line[36:75].strip(),
-            "payer_address": line[76:115].strip(),
-            "payer_city": line[116:130].strip(),
-            "payer_zip": line[131:136].strip(),
-            "payer_state": line[138:140].strip(),
+            "payer_enrollment_number": line[21:36].strip(),
+            "payer_name": line[36:76].strip(),
+            "beneficiary_enrollment_type": line[76:77].strip(),
+            "beneficiary_enrollment_number": line[77:92].strip(),
+            "beneficiary_name": line[92:132].strip(),
+            "final_enrollment_type": line[132:133].strip(),
+            "final_enrollment_number": line[133:148].strip(),
+            "final_name": line[148:188].strip(),
         }
 
     elif code == 'N':
@@ -221,7 +239,6 @@ def extract_fields(line: str, code: str) -> Dict:
             "auth_code": line[18:58].strip(),
         }
 
-    else:
-        return {
-            "note": f"Segment {code} not yet mapped."
-        }
+    return {
+        "note": f"Segment {code} not yet mapped."
+    }
